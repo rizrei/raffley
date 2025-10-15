@@ -3,8 +3,16 @@ defmodule RaffleyWeb.RuleController do
   alias Raffley.Rules
 
   def index(conn, _params) do
-    rules = Rules.list_rules()
-    emojis = ~w(🏆 🙌 🎉) |> Enum.random() |> String.duplicate(5)
-    render(conn, :index, rules: rules, emojis: emojis)
+    conn
+    |> assign(:rules, Rules.list_rules())
+    |> assign(:emojis, ~w(🏆 🙌 🎉) |> Enum.random() |> String.duplicate(5))
+    |> render(:index)
+  end
+
+  def show(conn, %{"id" => id}) do
+    conn
+    |> assign(:rule, Rules.get_rule(id))
+    |> assign(:greating, ~w(Hi Howdy Hello) |> Enum.random())
+    |> render(:show)
   end
 end

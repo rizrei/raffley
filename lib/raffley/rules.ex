@@ -3,6 +3,9 @@ defmodule Raffley.Rules do
   Module for managing raffle rules.
   """
 
+  @type rule :: %{id: integer(), text: String.t()}
+
+  @spec list_rules() :: list(rule())
   def list_rules do
     [
       %{
@@ -18,5 +21,14 @@ defmodule Raffley.Rules do
         text: "Have fun! 🎟️"
       }
     ]
+  end
+
+  @spec get_rule(integer() | String.t()) :: rule() | nil
+  def get_rule(id) when is_integer(id) do
+    list_rules() |> Enum.find(&(&1.id == id))
+  end
+
+  def get_rule(id) when is_binary(id) do
+    id |> String.to_integer() |> get_rule()
   end
 end
