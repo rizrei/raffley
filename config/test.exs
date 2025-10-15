@@ -10,6 +10,7 @@ config :raffley, Raffley.Repo,
   password: "postgres",
   hostname: "localhost",
   database: "raffley_test#{System.get_env("MIX_TEST_PARTITION")}",
+  port: "54329",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 
