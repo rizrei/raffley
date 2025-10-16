@@ -1,4 +1,4 @@
-defmodule RaffleyWeb.EstimatorLive do
+defmodule RaffleyWeb.EstimatorLive.Show do
   use RaffleyWeb, :live_view
 
   def mount(_params, _session, socket) do
