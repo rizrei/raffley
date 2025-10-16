@@ -20,6 +20,8 @@ defmodule RaffleyWeb.Router do
     get "/", PageController, :home
 
     resources "/rules", RuleController, only: [:index, :show]
+
+    live "/estimator", EstimatorLive
   end
 
   scope "/api", RaffleyWeb do
