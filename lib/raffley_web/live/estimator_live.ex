@@ -22,6 +22,11 @@ defmodule RaffleyWeb.EstimatorLive do
           =
           <div>${@tickets * @price}</div>
         </section>
+
+        <form phx-change="set_price">
+          <label for="price">Ticket price</label>
+          <input type="number" name="price" value={@price} />
+        </form>
       </div>
     </Layouts.app>
     """
@@ -29,6 +34,12 @@ defmodule RaffleyWeb.EstimatorLive do
 
   def handle_event("add", %{"quantity" => quantity}, socket) do
     socket = update(socket, :tickets, &(&1 + String.to_integer(quantity)))
+
+    {:noreply, socket}
+  end
+
+  def handle_event("set_price", %{"price" => price}, socket) do
+    socket = assign(socket, :price, String.to_integer(price))
 
     {:noreply, socket}
   end
