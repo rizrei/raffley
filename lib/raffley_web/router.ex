@@ -21,6 +21,7 @@ defmodule RaffleyWeb.Router do
     live "/", RaffleLive.Index, :index
     live "/estimator", EstimatorLive.Show, :show
     live "/raffles", RaffleLive.Index, :index
+    live "/raffles/:id", RaffleLive.Show, :show
 
     resources "/rules", RuleController, only: [:index, :show]
   end
