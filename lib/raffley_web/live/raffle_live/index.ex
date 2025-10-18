@@ -14,7 +14,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
     ~H"""
     <Layouts.app flash={@flash}>
       <div class="raffle-index">
-        <.banner>
+        <.banner :if={false}>
           <.icon name="hero-sparkles-solid" /> Mystery Raffle Coming Soon!
           <:details :let={emoji}>To Be Revealed Tomorrow {emoji}</:details>
           <:details>Any guesses?</:details>

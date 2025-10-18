@@ -4,7 +4,7 @@ defmodule RaffleyWeb.EstimatorLive.Show do
   def mount(_params, _session, socket) do
     if connected?(socket), do: send_tick()
 
-    socket = assign(socket, tickets: 0, price: 3)
+    socket = assign(socket, tickets: 0, price: 3, page_title: "Estimator")
     {:ok, socket}
   end
 

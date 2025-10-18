@@ -17,12 +17,12 @@ defmodule RaffleyWeb.Router do
   scope "/", RaffleyWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
-
-    resources "/rules", RuleController, only: [:index, :show]
-
+    # get "/", PageController, :home
+    live "/", RaffleLive.Index, :index
     live "/estimator", EstimatorLive.Show, :show
     live "/raffles", RaffleLive.Index, :index
+
+    resources "/rules", RuleController, only: [:index, :show]
   end
 
   scope "/api", RaffleyWeb do
