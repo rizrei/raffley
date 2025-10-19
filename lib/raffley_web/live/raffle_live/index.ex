@@ -6,8 +6,16 @@ defmodule RaffleyWeb.RaffleLive.Index do
   import RaffleyWeb.BannerComponents
 
   def mount(_params, _session, socket) do
-    socket = stream(socket, :raffles, Raffles.filter_raffles())
     {:ok, socket}
+  end
+
+  def handle_params(params, _uri, socket) do
+    socket =
+      socket
+      |> stream(:raffles, Raffles.filter_raffles(params), reset: true)
+      |> assign(:form, to_form(params))
+
+    {:noreply, socket}
   end
 
   def render(assigns) do
@@ -19,11 +27,51 @@ defmodule RaffleyWeb.RaffleLive.Index do
           <:details :let={emoji}>To Be Revealed Tomorrow {emoji}</:details>
           <:details>Any guesses?</:details>
         </.banner>
+        <.filter_form form={@form} />
         <div class="raffles" id="raffles" phx-update="stream">
+          <div id="empty" class="no-results only:block hidden">
+            No raffles found. Try changing your filters.
+          </div>
           <.raffle_card :for={{dom_id, raffle} <- @streams.raffles} raffle={raffle} id={dom_id} />
         </div>
       </div>
     </Layouts.app>
+    """
+  end
+
+  attr :form, :map, required: true
+
+  def filter_form(assigns) do
+    ~H"""
+    <.form for={@form} id="filter-form" phx-change="filter">
+      <.input
+        field={@form["q"]}
+        type="search"
+        placeholder="Search..."
+        autocomplete="off"
+        phx-debounce={500}
+      />
+      <.input
+        field={@form["status"]}
+        type="select"
+        options={[:upcoming, :open, :closed]}
+        prompt="Status"
+      />
+
+      <.input
+        field={@form["sort_by"]}
+        type="select"
+        options={[
+          Prize: "prize",
+          "Price: High to Low": "ticket_price_desc",
+          "Price: Low to High": "ticket_price_asc"
+        ]}
+        prompt="Sort"
+      />
+      <.button patch={~p"/raffles"}>
+        Reset
+      </.button>
+    </.form>
     """
   end
 
@@ -45,5 +93,15 @@ defmodule RaffleyWeb.RaffleLive.Index do
       </div>
     </.link>
     """
+  end
+
+  def handle_event("filter", params, socket) do
+    filtered_params =
+      params
+      |> Map.filter(fn {k, v} -> k in ~w(q status sort_by) and v not in [nil, ""] end)
+
+    socket = push_patch(socket, to: ~p"/raffles?#{filtered_params}")
+
+    {:noreply, socket}
   end
 end
