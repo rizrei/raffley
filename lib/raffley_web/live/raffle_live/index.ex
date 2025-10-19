@@ -6,7 +6,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
   import RaffleyWeb.BannerComponents
 
   def mount(_params, _session, socket) do
-    socket = stream(socket, :raffles, Raffles.list_raffles())
+    socket = stream(socket, :raffles, Raffles.filter_raffles())
     {:ok, socket}
   end
 
