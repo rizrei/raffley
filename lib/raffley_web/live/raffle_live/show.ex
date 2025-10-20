@@ -2,6 +2,8 @@ defmodule RaffleyWeb.RaffleLive.Show do
   use RaffleyWeb, :live_view
 
   alias Raffley.Raffles
+  alias Phoenix.LiveView.AsyncResult
+
   import RaffleyWeb.BadgeComponents
 
   def mount(_params, _session, socket) do
@@ -15,7 +17,8 @@ defmodule RaffleyWeb.RaffleLive.Show do
       socket
       |> assign(:raffle, raffle)
       |> assign(:page_title, raffle.prize)
-      |> assign(:featured_raffles, Raffles.featured_raffles(raffle))
+      |> assign(:featured_raffles, AsyncResult.loading())
+      |> start_async(:fetch_raffles_task, fn -> Raffles.featured_raffles(raffle) end)
 
     {:noreply, socket}
   end
@@ -54,14 +57,42 @@ defmodule RaffleyWeb.RaffleLive.Show do
     ~H"""
     <section>
       <h4>Featured Raffles</h4>
-      <ul class="raffles">
-        <li :for={raffle <- @raffles}>
-          <.link navigate={~p"/raffles/#{raffle}"}>
-            <img src={raffle.image_path} /> {raffle.prize}
-          </.link>
-        </li>
-      </ul>
+      <.async_result :let={result} assign={@raffles}>
+        <:loading>
+          <div class="loading">
+            <div class="spinner"></div>
+          </div>
+        </:loading>
+        <:failed :let={{:error, reason}}>
+          <div class="failed">
+            Yikes: {reason}
+          </div>
+        </:failed>
+        <ul class="raffles">
+          <li :for={raffle <- result}>
+            <.link navigate={~p"/raffles/#{raffle}"}>
+              <img src={raffle.image_path} /> {raffle.prize}
+            </.link>
+          </li>
+        </ul>
+      </.async_result>
     </section>
     """
+  end
+
+  def handle_async(:fetch_raffles_task, {:ok, raffles}, socket) do
+    # do anything extra here
+
+    result = AsyncResult.ok(socket.assigns.featured_raffles, raffles)
+
+    {:noreply, assign(socket, :featured_raffles, result)}
+  end
+
+  def handle_async(:fetch_raffles_task, {:exit, reason}, socket) do
+    # do anything extra
+
+    result = AsyncResult.failed(socket.assigns.featured_raffles, {:exit, reason})
+
+    {:noreply, assign(socket, :featured_raffles, result)}
   end
 end
