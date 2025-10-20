@@ -1,4 +1,5 @@
 import Ecto.Query
+import Ecto.Changeset
 
 alias Raffley.Repo
 alias Raffley.Raffles

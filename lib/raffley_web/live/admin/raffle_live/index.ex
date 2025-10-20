@@ -21,7 +21,12 @@ defmodule RaffleyWeb.Admin.RaffleLive.Index do
     ~H"""
     <Layouts.app flash={@flash}>
       <div class="admin-index">
-        <.header>{@page_title}</.header>
+        <.header>
+          {@page_title}
+          <:actions>
+            <.button navigate={~p"/admin/raffles/new"}>New Raffle</.button>
+          </:actions>
+        </.header>
 
         <.table id="raffles" rows={@streams.raffles}>
           <:col :let={{_dom_id, raffle}} label="Prize">

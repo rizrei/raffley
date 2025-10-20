@@ -25,6 +25,7 @@ defmodule RaffleyWeb.Router do
 
     scope "/admin" do
       live "/raffles", Admin.RaffleLive.Index, :index
+      live "/raffles/new", Admin.RaffleLive.Form, :new
     end
 
     resources "/rules", RuleController, only: [:index, :show]
