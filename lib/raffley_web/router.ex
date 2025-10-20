@@ -23,6 +23,10 @@ defmodule RaffleyWeb.Router do
     live "/raffles", RaffleLive.Index, :index
     live "/raffles/:id", RaffleLive.Show, :show
 
+    scope "/admin" do
+      live "/raffles", Admin.RaffleLive.Index, :index
+    end
+
     resources "/rules", RuleController, only: [:index, :show]
   end
 
