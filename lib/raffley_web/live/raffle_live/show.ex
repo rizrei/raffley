@@ -6,23 +6,6 @@ defmodule RaffleyWeb.RaffleLive.Show do
 
   import RaffleyWeb.BadgeComponents
 
-  def mount(_params, _session, socket) do
-    {:ok, socket}
-  end
-
-  def handle_params(%{"id" => id}, _uri, socket) do
-    raffle = Raffles.get_raffle!(id)
-
-    socket =
-      socket
-      |> assign(:raffle, raffle)
-      |> assign(:page_title, raffle.prize)
-      |> assign(:featured_raffles, AsyncResult.loading())
-      |> start_async(:fetch_raffles_task, fn -> Raffles.featured_raffles(raffle) end)
-
-    {:noreply, socket}
-  end
-
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
@@ -32,7 +15,13 @@ defmodule RaffleyWeb.RaffleLive.Show do
           <section>
             <.badge status={@raffle.status} />
             <header>
-              <h2>{@raffle.prize}</h2>
+              <div>
+                <h2>{@raffle.prize}</h2>
+                <.link :if={@raffle.charity} navigate={~p"/charities/#{@raffle.charity}"}>
+                  <h3>{@raffle.charity.name}</h3>
+                </.link>
+              </div>
+
               <div class="price">
                 ${@raffle.ticket_price} / ticket
               </div>
@@ -78,6 +67,23 @@ defmodule RaffleyWeb.RaffleLive.Show do
       </.async_result>
     </section>
     """
+  end
+
+  def mount(_params, _session, socket) do
+    {:ok, socket}
+  end
+
+  def handle_params(%{"id" => id}, _uri, socket) do
+    raffle = Raffles.get_raffle_with_charity!(id)
+
+    socket =
+      socket
+      |> assign(:raffle, raffle)
+      |> assign(:page_title, raffle.prize)
+      |> assign(:featured_raffles, AsyncResult.loading())
+      |> start_async(:fetch_raffles_task, fn -> Raffles.featured_raffles(raffle) end)
+
+    {:noreply, socket}
   end
 
   def handle_async(:fetch_raffles_task, {:ok, raffles}, socket) do

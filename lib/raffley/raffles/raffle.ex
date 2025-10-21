@@ -9,15 +9,18 @@ defmodule Raffley.Raffles.Raffle do
     field :status, Ecto.Enum, values: [:upcoming, :open, :closed], default: :upcoming
     field :image_path, :string, default: "/images/placeholder.jpg"
 
+    belongs_to :charity, Raffley.Charities.Charity
+
     timestamps(type: :utc_datetime)
   end
 
   @doc false
   def changeset(raffle, attrs) do
     raffle
-    |> cast(attrs, [:prize, :description, :ticket_price, :status, :image_path])
+    |> cast(attrs, [:prize, :description, :ticket_price, :status, :image_path, :charity_id])
     |> validate_required([:prize, :description, :ticket_price, :status, :image_path])
     |> validate_length(:description, min: 10)
     |> validate_number(:ticket_price, greater_than_or_equal_to: 1)
+    |> foreign_key_constraint(:charity_id)
   end
 end

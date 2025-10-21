@@ -37,6 +37,10 @@ defmodule Raffley.Charities do
   """
   def get_charity!(id), do: Repo.get!(Charity, id)
 
+  def get_charity_with_raffles!(id) do
+    id |> get_charity!() |> Repo.preload(:raffles)
+  end
+
   @doc """
   Creates a charity.
 

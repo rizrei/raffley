@@ -5,19 +5,6 @@ defmodule RaffleyWeb.RaffleLive.Index do
   import RaffleyWeb.BadgeComponents
   import RaffleyWeb.BannerComponents
 
-  def mount(_params, _session, socket) do
-    {:ok, socket}
-  end
-
-  def handle_params(params, _uri, socket) do
-    socket =
-      socket
-      |> stream(:raffles, Raffles.filter_raffles(params), reset: true)
-      |> assign(:form, to_form(params))
-
-    {:noreply, socket}
-  end
-
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
@@ -82,6 +69,9 @@ defmodule RaffleyWeb.RaffleLive.Index do
     ~H"""
     <.link navigate={~p"/raffles/#{@raffle}"} id={@id}>
       <div class="card">
+        <div :if={@raffle.charity} class="charity">
+          {@raffle.charity.name}
+        </div>
         <img src={@raffle.image_path} />
         <h2>{@raffle.prize}</h2>
         <div class="details">
@@ -93,6 +83,19 @@ defmodule RaffleyWeb.RaffleLive.Index do
       </div>
     </.link>
     """
+  end
+
+  def mount(_params, _session, socket) do
+    {:ok, socket}
+  end
+
+  def handle_params(params, _uri, socket) do
+    socket =
+      socket
+      |> stream(:raffles, Raffles.filter_raffles(params), reset: true)
+      |> assign(:form, to_form(params))
+
+    {:noreply, socket}
   end
 
   def handle_event("filter", params, socket) do

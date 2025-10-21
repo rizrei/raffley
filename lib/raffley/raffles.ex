@@ -9,11 +9,15 @@ defmodule Raffley.Raffles do
   end
 
   def filter_raffles(filters \\ %{}) do
-    FilterRaffles.call(filters)
+    FilterRaffles.call(filters) |> Repo.preload(:charity)
   end
 
   def get_raffle!(id) do
     Repo.get!(Raffle, id)
+  end
+
+  def get_raffle_with_charity!(id) do
+    id |> get_raffle!() |> Repo.preload(:charity)
   end
 
   def featured_raffles(raffle) do
