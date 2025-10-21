@@ -21,6 +21,13 @@ defmodule Raffley.Charities do
     Repo.all(Charity)
   end
 
+  def charities_name_and_slugs do
+    Charity
+    |> order_by(:name)
+    |> select([c], {c.name, c.slug})
+    |> Repo.all()
+  end
+
   @doc """
   Gets a single charity.
 

@@ -1,9 +1,11 @@
 defmodule RaffleyWeb.RaffleLive.Index do
   use RaffleyWeb, :live_view
 
-  alias Raffley.Raffles
   import RaffleyWeb.BadgeComponents
   import RaffleyWeb.BannerComponents
+
+  alias Raffley.Raffles
+  alias Raffley.Charities
 
   def render(assigns) do
     ~H"""
@@ -14,7 +16,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
           <:details :let={emoji}>To Be Revealed Tomorrow {emoji}</:details>
           <:details>Any guesses?</:details>
         </.banner>
-        <.filter_form form={@form} />
+        <.filter_form form={@form} charity_options={@charity_options} />
         <div class="raffles" id="raffles" phx-update="stream">
           <div id="empty" class="no-results only:block hidden">
             No raffles found. Try changing your filters.
@@ -27,6 +29,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
   end
 
   attr :form, :map, required: true
+  attr :charity_options, :list, required: true
 
   def filter_form(assigns) do
     ~H"""
@@ -46,12 +49,20 @@ defmodule RaffleyWeb.RaffleLive.Index do
       />
 
       <.input
+        field={@form["charity"]}
+        type="select"
+        options={@charity_options}
+        prompt="Charity"
+      />
+
+      <.input
         field={@form["sort_by"]}
         type="select"
         options={[
           Prize: "prize",
           "Price: High to Low": "ticket_price_desc",
-          "Price: Low to High": "ticket_price_asc"
+          "Price: Low to High": "ticket_price_asc",
+          Charity: "charity"
         ]}
         prompt="Sort"
       />
@@ -86,6 +97,10 @@ defmodule RaffleyWeb.RaffleLive.Index do
   end
 
   def mount(_params, _session, socket) do
+    socket =
+      socket
+      |> assign(:charity_options, Charities.charities_name_and_slugs())
+
     {:ok, socket}
   end
 
@@ -101,7 +116,7 @@ defmodule RaffleyWeb.RaffleLive.Index do
   def handle_event("filter", params, socket) do
     filtered_params =
       params
-      |> Map.filter(fn {k, v} -> k in ~w(q status sort_by) and v not in [nil, ""] end)
+      |> Map.filter(fn {k, v} -> k in ~w(q status sort_by charity) and v not in [nil, ""] end)
 
     socket = push_patch(socket, to: ~p"/raffles?#{filtered_params}")
 
