@@ -17,6 +17,22 @@ defmodule RaffleyWeb.Admin.RaffleLive.Index do
     {:noreply, socket}
   end
 
+  def handle_event("delete", %{"id" => id}, socket) do
+    socket =
+      case Raffles.get_raffle!(id) |> Raffles.delete_raffle() do
+        {:ok, raffle} ->
+          socket
+          |> put_flash(:info, "Raffle deleted successfully!")
+          |> stream_delete(:raffles, raffle)
+
+        {:error, %Ecto.Changeset{}} ->
+          socket
+          |> put_flash(:error, "Something went wrong!")
+      end
+
+    {:noreply, socket}
+  end
+
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash}>
@@ -43,6 +59,12 @@ defmodule RaffleyWeb.Admin.RaffleLive.Index do
 
           <:action :let={{_dom_id, raffle}}>
             <.link navigate={~p"/admin/raffles/#{raffle}/edit"}>Edit</.link>
+          </:action>
+
+          <:action :let={{_dom_id, raffle}}>
+            <.link phx-click="delete" phx-value-id={raffle.id} data-confirm="Are you shure?">
+              Delete
+            </.link>
           </:action>
         </.table>
       </div>
