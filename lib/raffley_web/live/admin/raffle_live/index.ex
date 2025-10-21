@@ -3,6 +3,7 @@ defmodule RaffleyWeb.Admin.RaffleLive.Index do
 
   alias Raffley.Admin.Raffles
   import RaffleyWeb.BadgeComponents
+  import RaffleyWeb.JSComponents
 
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -44,7 +45,11 @@ defmodule RaffleyWeb.Admin.RaffleLive.Index do
           </:actions>
         </.header>
 
-        <.table id="raffles" rows={@streams.raffles}>
+        <.table
+          id="raffles"
+          rows={@streams.raffles}
+          row_click={fn {_, raffle} -> JS.navigate(~p"/raffles/#{raffle}") end}
+        >
           <:col :let={{_dom_id, raffle}} label="Prize">
             <.link navigate={~p"/raffles/#{raffle}"}>
               {raffle.prize}
@@ -61,8 +66,8 @@ defmodule RaffleyWeb.Admin.RaffleLive.Index do
             <.link navigate={~p"/admin/raffles/#{raffle}/edit"}>Edit</.link>
           </:action>
 
-          <:action :let={{_dom_id, raffle}}>
-            <.link phx-click="delete" phx-value-id={raffle.id} data-confirm="Are you shure?">
+          <:action :let={{dom_id, raffle}}>
+            <.link phx-click={delete_and_hide(dom_id, raffle)} data-confirm="Are you shure?">
               Delete
             </.link>
           </:action>
