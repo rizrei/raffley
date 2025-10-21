@@ -46,6 +46,10 @@ defmodule RaffleyWeb.Layouts do
           <li>
             <.link navigate={~p"/raffles"}>Raffles</.link>
           </li>
+          
+          <li>
+            <.link navigate={~p"/charities"}>Charities</.link>
+          </li>
           <li>
             <.link navigate={~p"/estimator"}>Estimator</.link>
           </li>
