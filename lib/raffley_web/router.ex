@@ -37,8 +37,10 @@ defmodule RaffleyWeb.Router do
     resources "/rules", RuleController, only: [:index, :show]
   end
 
-  scope "/api", RaffleyWeb do
+  scope "/api", RaffleyWeb.Api do
     pipe_through :api
+
+    resources "/raffles", RaffleController, only: [:index, :show, :create]
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

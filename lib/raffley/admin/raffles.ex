@@ -9,9 +9,9 @@ defmodule Raffley.Admin.Raffles do
     |> Repo.all()
   end
 
-  def get_raffle!(id) do
-    Raffle |> Repo.get!(id)
-  end
+  def get_raffle!(id), do: Repo.get!(Raffle, id)
+
+  def fetch_raffle(id), do: fetch(id, &get_raffle!/1)
 
   def create_raffle(attrs) do
     %Raffle{}
@@ -31,5 +31,11 @@ defmodule Raffley.Admin.Raffles do
 
   def delete_raffle(raffle) do
     Repo.delete(raffle)
+  end
+
+  defp fetch(attr, f) do
+    f.(attr) |> then(&{:ok, &1})
+  rescue
+    Ecto.NoResultsError -> {:error, :not_found}
   end
 end
