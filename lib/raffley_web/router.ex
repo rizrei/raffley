@@ -26,6 +26,12 @@ defmodule RaffleyWeb.Router do
     live "/raffles", RaffleLive.Index, :index
     live "/raffles/:id", RaffleLive.Show, :show
 
+    resources "/rules", RuleController, only: [:index, :show]
+  end
+
+  scope "/", RaffleyWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
     live "/charities", CharityLive.Index, :index
     live "/charities/new", CharityLive.Form, :new
     live "/charities/:id", CharityLive.Show, :show
@@ -36,8 +42,6 @@ defmodule RaffleyWeb.Router do
       live "/raffles/new", Admin.RaffleLive.Form, :new
       live "/raffles/:id/edit", Admin.RaffleLive.Form, :edit
     end
-
-    resources "/rules", RuleController, only: [:index, :show]
   end
 
   scope "/api", RaffleyWeb.Api do

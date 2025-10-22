@@ -5,6 +5,8 @@ defmodule RaffleyWeb.Admin.RaffleLive.Index do
   import RaffleyWeb.BadgeComponents
   import RaffleyWeb.JSComponents
 
+  on_mount {RaffleyWeb.UserAuth, :require_authenticated}
+
   def mount(_params, _session, socket) do
     {:ok, socket}
   end
