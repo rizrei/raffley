@@ -7,24 +7,24 @@ defmodule RaffleyWeb.CharityLiveTest do
   @create_attrs %{name: "some name", slug: "some slug"}
   @update_attrs %{name: "some updated name", slug: "some updated slug"}
   @invalid_attrs %{name: nil, slug: nil}
-  defp create_charity(_) do
-    charity = charity_fixture()
-
-    %{charity: charity}
-  end
+  defp create_charity(_), do: %{charity: charity_fixture()}
 
   describe "Index" do
-    setup [:create_charity]
+    setup [:register_and_log_in_admin, :create_charity]
 
     test "lists all charities", %{conn: conn, charity: charity} do
-      {:ok, _index_live, html} = live(conn, ~p"/charities")
+      {:ok, _index_live, html} =
+        conn
+        |> live(~p"/charities")
 
       assert html =~ "Listing Charities"
       assert html =~ charity.name
     end
 
     test "saves new charity", %{conn: conn} do
-      {:ok, index_live, _html} = live(conn, ~p"/charities")
+      {:ok, index_live, _html} =
+        conn
+        |> live(~p"/charities")
 
       assert {:ok, form_live, _} =
                index_live
@@ -50,7 +50,9 @@ defmodule RaffleyWeb.CharityLiveTest do
     end
 
     test "updates charity in listing", %{conn: conn, charity: charity} do
-      {:ok, index_live, _html} = live(conn, ~p"/charities")
+      {:ok, index_live, _html} =
+        conn
+        |> live(~p"/charities")
 
       assert {:ok, form_live, _html} =
                index_live
@@ -76,7 +78,9 @@ defmodule RaffleyWeb.CharityLiveTest do
     end
 
     test "deletes charity in listing", %{conn: conn, charity: charity} do
-      {:ok, index_live, _html} = live(conn, ~p"/charities")
+      {:ok, index_live, _html} =
+        conn
+        |> live(~p"/charities")
 
       assert index_live |> element("#charities-#{charity.id} a", "Delete") |> render_click()
       refute has_element?(index_live, "#charities-#{charity.id}")
@@ -84,7 +88,7 @@ defmodule RaffleyWeb.CharityLiveTest do
   end
 
   describe "Show" do
-    setup [:create_charity]
+    setup [:register_and_log_in_admin, :create_charity]
 
     test "displays charity", %{conn: conn, charity: charity} do
       {:ok, _show_live, html} = live(conn, ~p"/charities/#{charity}")
