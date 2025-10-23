@@ -11,6 +11,9 @@ defmodule Raffley.Accounts.User do
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
 
+    has_many :tickets, Raffley.Tickets.Ticket, on_delete: :delete_all
+    many_to_many :raffles, Raffley.Raffles.Raffle, join_through: "tickets"
+
     timestamps(type: :utc_datetime)
   end
 

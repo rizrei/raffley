@@ -28,4 +28,14 @@ defmodule Raffley.Raffles do
     |> limit(3)
     |> Repo.all()
   end
+
+  def create_raffle(attrs) do
+    %Raffle{}
+    |> Raffle.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  def delete_raffle(raffle) do
+    Repo.delete(raffle)
+  end
 end

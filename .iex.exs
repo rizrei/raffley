@@ -12,4 +12,7 @@ alias Raffley.Charities.Charity
 alias Raffley.Accounts
 alias Raffley.Accounts.User
 
+alias Raffley.Tickets
+alias Raffley.Tickets.Ticket
+
 alias Raffley.Admin.Raffles, as: AdminRaffles
