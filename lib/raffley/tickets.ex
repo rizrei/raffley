@@ -3,34 +3,12 @@ defmodule Raffley.Tickets do
   The Tickets context.
   """
 
-  import Ecto.Query, warn: false
-  alias Raffley.Repo
+  use Raffley, :query
+  use Raffley, :pub_sub
 
   alias Raffley.Raffles.Raffle
   alias Raffley.Tickets.Ticket
   alias Raffley.Accounts.Scope
-
-  @doc """
-  Subscribes to scoped notifications about any ticket changes.
-
-  The broadcasted messages match the pattern:
-
-    * {:created, %Ticket{}}
-    * {:updated, %Ticket{}}
-    * {:deleted, %Ticket{}}
-
-  """
-  def subscribe_tickets(%Scope{} = scope) do
-    key = scope.user.id
-
-    Phoenix.PubSub.subscribe(Raffley.PubSub, "user:#{key}:tickets")
-  end
-
-  defp broadcast_ticket(%Scope{} = scope, message) do
-    key = scope.user.id
-
-    Phoenix.PubSub.broadcast(Raffley.PubSub, "user:#{key}:tickets", message)
-  end
 
   @doc """
   Returns the list of tickets.
@@ -83,11 +61,12 @@ defmodule Raffley.Tickets do
 
   """
   def create_ticket(%Scope{} = scope, attrs) do
-    with {:ok, ticket = %Ticket{}} <-
-           %Ticket{user: scope.user}
+    with {:ok, %Ticket{} = ticket} <-
+           %Ticket{}
            |> Ticket.changeset(attrs, scope)
            |> Repo.insert() do
-      broadcast_ticket(scope, {:created, ticket})
+      ticket_with_user = ticket |> Repo.preload(:user)
+      broadcast("raffle:#{ticket.raffle_id}", {:created, ticket_with_user})
       {:ok, ticket}
     end
   end
@@ -107,11 +86,10 @@ defmodule Raffley.Tickets do
   def update_ticket(%Scope{} = scope, %Ticket{} = ticket, attrs) do
     true = ticket.user_id == scope.user.id
 
-    with {:ok, ticket = %Ticket{}} <-
+    with {:ok, %Ticket{} = ticket} <-
            ticket
            |> Ticket.changeset(attrs, scope)
            |> Repo.update() do
-      broadcast_ticket(scope, {:updated, ticket})
       {:ok, ticket}
     end
   end
@@ -133,7 +111,6 @@ defmodule Raffley.Tickets do
 
     with {:ok, ticket = %Ticket{}} <-
            Repo.delete(ticket) do
-      broadcast_ticket(scope, {:deleted, ticket})
       {:ok, ticket}
     end
   end

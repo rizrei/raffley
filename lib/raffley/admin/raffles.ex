@@ -1,5 +1,6 @@
 defmodule Raffley.Admin.Raffles do
   use Raffley, :query
+  use Raffley, :pub_sub
 
   alias Raffley.Raffles.Raffle
 
@@ -24,9 +25,13 @@ defmodule Raffley.Admin.Raffles do
   end
 
   def update_raffle(%Raffle{} = raffle, attrs) do
-    raffle
-    |> Raffle.changeset(attrs)
-    |> Repo.update()
+    with {:ok, %Raffle{} = raffle} <-
+           raffle
+           |> Raffle.changeset(attrs)
+           |> Repo.update() do
+      broadcast("raffle:#{raffle.id}", {:updated, raffle})
+      {:ok, raffle}
+    end
   end
 
   def delete_raffle(raffle) do

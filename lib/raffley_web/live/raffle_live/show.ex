@@ -1,6 +1,8 @@
 defmodule RaffleyWeb.RaffleLive.Show do
+  use Raffley, :pub_sub
   use RaffleyWeb, :live_view
 
+  alias Raffley.Repo
   alias Raffley.Raffles
   alias Raffley.Tickets
   alias Raffley.Tickets.Ticket
@@ -125,6 +127,7 @@ defmodule RaffleyWeb.RaffleLive.Show do
   on_mount {RaffleyWeb.UserAuth, :mount_current_scope}
 
   def mount(%{"id" => id}, _session, socket) do
+    if connected?(socket), do: subscribe("raffle:#{id}")
     raffle = Raffles.get_raffle_with_charity!(id)
     tickets = Tickets.list_tickets_by_raffle(raffle)
 
@@ -169,18 +172,29 @@ defmodule RaffleyWeb.RaffleLive.Show do
 
   def handle_event("save", %{"ticket" => ticket_params}, socket) do
     case create_ticket(socket.assigns, ticket_params) do
-      {:ok, ticket} ->
+      {:ok, _} ->
         {:noreply,
          socket
-         |> stream_insert(:tickets, ticket, at: 0)
-         |> update(:ticket_sum, &(&1 + ticket.price))
-         |> update(:ticket_count, &(&1 + 1))
          |> assign(form: ticket_form(socket.assigns))
          |> put_flash(:info, "Ticket created successfully")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
     end
+  end
+
+  def handle_info({:created, ticket}, socket) do
+    {:noreply,
+     socket
+     |> stream_insert(:tickets, ticket, at: 0)
+     |> update(:ticket_sum, &(&1 + ticket.price))
+     |> update(:ticket_count, &(&1 + 1))}
+  end
+
+  def handle_info({:updated, raffle}, socket) do
+    {:noreply,
+     socket
+     |> assign(:raffle, raffle |> Repo.preload(:charity))}
   end
 
   def ticket_form(%{current_scope: scope}) do
